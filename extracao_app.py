@@ -61,10 +61,17 @@ def extract_data_from_xml(file_content):
             razao_social_forn = root.find('.//nfe:emit/nfe:xNome', namespaces).text
         except:
             razao_social_forn = ''
+        
+        # Verificar se a nota foi cancelada
+        try:
+            cStat = root.find('.//nfe:protNFe/nfe:infProt/nfe:cStat', namespaces).text
+            status_cancelada = 'Sim' if cStat == '101' else 'Não'
+        except:
+            status_cancelada = 'Não'
 
         # Adicionar as informações extraídas à lista de dados se algum dado foi encontrado
         if any([razao_social_dest, data_emissao, numero_nota, valor_total, primeiro_vencimento, razao_social_forn]):
-            data.append([razao_social_dest, data_emissao, numero_nota, valor_total, primeiro_vencimento, razao_social_forn])
+            data.append([razao_social_dest, data_emissao, numero_nota, valor_total, primeiro_vencimento, razao_social_forn, status_cancelada])
     except Exception as e:
         data = None
 
@@ -98,7 +105,8 @@ def main():
                 'Numero da Nota', 
                 'Valor Total', 
                 'Primeiro Vencimento', 
-                'Razao Social Fornecedor'
+                'Razao Social Fornecedor',
+                'Nota Cancelada'
             ])
             df['Valor Total'] = df['Valor Total'].apply(lambda x: f'R${x:,.2f}' if isinstance(x, (int, float)) else x)
             
